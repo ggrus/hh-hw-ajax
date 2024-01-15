@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gh-pages": "gh-pages -d dist"
   },
   "devDependencies": {
     "@typescript-eslint/parser": "^6.18.1",
     "eslint": "8.29.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.2.1",
+    "gh-pages": "^6.1.1",
     "prettier": "2.8.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
