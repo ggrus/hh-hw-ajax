@@ -10,7 +10,7 @@ const historyDiv = document.querySelector('.history__items') as HTMLDivElement;
 const historyShow = (historyData: any) => {
     historyDiv.innerHTML = '';
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < Math.min(3, historyData.length); i++) {
         const el = historyData[i];
         const div = document.createElement('div');
         div.classList.add('history__item');
