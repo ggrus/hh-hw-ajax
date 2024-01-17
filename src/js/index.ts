@@ -1,6 +1,10 @@
-import { getBeersByName, getBeerById, BeerFull, Beer } from './api';
-import { debounce, hideBlock } from './helper';
-import { saveSearchsInLocalStorage, getSearchsFromLocalStorage } from './localStorageApi';
+import { getBeersByName, getBeerById, BeerFull } from './api';
+import { createSuggestItems, debounce, deleteNotUniqueArrayElements, hideBlock } from './helper';
+import {
+    saveSearchsInLocalStorage,
+    getSearchsFromLocalStorage,
+    getVisitedSearchsFromLocalStorage,
+} from './localStorageApi';
 
 const searchbarInput = document.querySelector('#search') as HTMLInputElement;
 const suggestsDiv = document.querySelector('.suggests') as HTMLDivElement;
@@ -49,7 +53,9 @@ const descriptionShow = (beerData: BeerFull) => {
     resultDiv.append(container);
 };
 
-const getBeers = async () => {
+const setBeersToSuggests = async () => {
+    const MAX_RESULTS_IN_SUGGESTS = 10;
+
     if (!searchbarInput || !suggestsDiv) {
         return;
     }
@@ -76,20 +82,21 @@ const getBeers = async () => {
 
     suggestsDiv.innerHTML = '';
 
-    beers.forEach((element: Beer) => {
-        const div = document.createElement('div');
-        div.setAttribute('data-id', element.id.toString());
-        div.classList.add('suggests__item');
-        div.innerText = element.name;
-        suggestsDiv?.append(div);
-    });
+    const visitedBeers = getVisitedSearchsFromLocalStorage(searchbarInput.value);
+    const filteredBeers = deleteNotUniqueArrayElements([...visitedBeers, ...beers]).splice(
+        0,
+        MAX_RESULTS_IN_SUGGESTS - visitedBeers.length
+    );
 
-    if (beers.length === 0) {
+    suggestsDiv?.append(...createSuggestItems(visitedBeers, 1));
+    suggestsDiv?.append(...createSuggestItems(filteredBeers));
+
+    if (filteredBeers.length === 0 && visitedBeers.length === 0) {
         suggestsDiv.innerText = 'No data to display :(';
     }
 };
 
-searchbarInput.addEventListener('keyup', debounce(getBeers, 400));
+searchbarInput.addEventListener('keyup', debounce(setBeersToSuggests, 400));
 
 suggestsDiv.addEventListener('click', async (e) => {
     const target = e.target as Element;
@@ -103,15 +110,9 @@ suggestsDiv.addEventListener('click', async (e) => {
         }
 
         const beerData: any = await getBeerById(id);
-
-        console.log(beerData[0]);
-
         descriptionShow(beerData[0]);
-
         const visited = getSearchsFromLocalStorage();
         const beerIndex = visited.findIndex((el: any) => el.name === name);
-
-        console.log(beerIndex);
 
         if (beerIndex > -1) {
             visited.splice(beerIndex, 1);

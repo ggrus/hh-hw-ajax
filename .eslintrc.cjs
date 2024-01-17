@@ -19,7 +19,6 @@ module.exports = {
             exceptMethods: [],
         },
     ],
-    'consistent-return': ['error'],
     curly: ['error'],
     'default-case': [
         0,
